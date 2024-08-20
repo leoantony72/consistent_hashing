@@ -5,16 +5,23 @@ type Node struct {
 	Host string
 }
 
+func (n *Node) put_file(path string)string{
+	return path
+}
+func (n *Node) fetch(path string)string{
+	return path
+}
+
 var storageNode []Node = []Node{
-	Node{"A", "192.8.12.1"},
-	Node{"B", "192.8.12.2"},
-	Node{"C", "192.8.12.3"},
-	Node{"D", "192.8.12.4"},
-	Node{"E", "192.8.12.5"},
+	{"A", "192.8.12.1"},
+	{"B", "192.8.12.2"},
+	{"C", "192.8.12.3"},
+	{"D", "192.8.12.4"},
+	{"E", "192.8.12.5"},
 }
 
 func main() {
-
+	
 }
 
 func hash(path string) int {
@@ -25,7 +32,7 @@ func hash(path string) int {
 	return sum % 5
 }
 
-func upload(path string) {
+func upload(path string) string{
 
 	index := hash(path)
 
@@ -34,3 +41,10 @@ func upload(path string) {
 	return node.put_file(path)
 }
 
+func fetch(path string) string{
+	index := hash(path)
+
+	node := storageNode[index]
+
+	return node.fetch(path)
+}
