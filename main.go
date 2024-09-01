@@ -1,50 +1,53 @@
 package main
 
+import (
+	"fmt"
+	"hash/crc32"
+	"sort"
+)
+
 type Node struct {
-	Name string
-	Host string
+	hash   int
+	server string
 }
 
-func (n *Node) put_file(path string)string{
-	return path
+type HashRing []Node
+
+func (h HashRing) Len() int {
+	return len(h)
 }
-func (n *Node) fetch(path string)string{
-	return path
+func (h HashRing) Less(i, j int) bool {
+	return h[i].hash < h[j].hash
 }
 
-var storageNode []Node = []Node{
-	{"A", "192.8.12.1"},
-	{"B", "192.8.12.2"},
-	{"C", "192.8.12.3"},
-	{"D", "192.8.12.4"},
-	{"E", "192.8.12.5"},
+func (h HashRing) Swap(i, j int) {
+	h[i], h[j] = h[j], h[i]
+}
+
+func (h *HashRing) AddServer(server string) {
+	hash := crc32.ChecksumIEEE([]byte(server))
+	node := Node{hash: int(hash), server: server}
+	*h = append(*h, node)
+	sort.Sort(h)
+}
+func (h *HashRing) RemoveServer(server string) {
+	hash := crc32.ChecksumIEEE([]byte(server))
+	for i, node := range *h {
+		if node.hash == int(hash) {
+			*h = append((*h)[:i], (*h)[i+1:]...)
+			break
+		}
+
+	}
+	sort.Sort(*h)
 }
 
 func main() {
-	
-}
 
-func hash(path string) int {
-	sum := 0
-	for _, b := range []byte(path) {
-		sum += int(b)
-	}
-	return sum % 5
-}
-
-func upload(path string) string{
-
-	index := hash(path)
-
-	node := storageNode[index]
-
-	return node.put_file(path)
-}
-
-func fetch(path string) string{
-	index := hash(path)
-
-	node := storageNode[index]
-
-	return node.fetch(path)
+	ring := HashRing{}
+	ring.AddServer("s1")
+	ring.AddServer("s2")
+	ring.AddServer("s34")
+	ring.AddServer("s78")
+	fmt.Println(ring)
 }
